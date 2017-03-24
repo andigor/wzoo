@@ -55,12 +55,23 @@ enum class CurrentState
   SkipTwoLoops,
   LoopAgain
 };
+
+enum class Status
+{
+  Continue,
+  LoopAgain,
+  Won
+};
+
 struct Gamer
 {
   CurrentState currentState = CurrentState::NoState;
   int curPosition = 0;
-
-  bool runOnce(std::mt19937& gen, std::uniform_int_distribution<>& dis)
+  void printMovement(int from, int offset)
+  {
+    std::cout << from << "->" << from + offset << " ";
+  }
+  Status runOnce(std::mt19937& gen, std::uniform_int_distribution<>& dis)
   {
     auto offset = dis(gen);
     std::cout << "throwing result: " << offset << "| ";
@@ -69,13 +80,13 @@ struct Gamer
     {
       std::cout << "skipping loop, staying at the same position: " << curPosition << std::endl;
       currentState = CurrentState::NoState;
-      return false;
+      return Status::Continue;
     }
     else if (currentState == CurrentState::SkipTwoLoops)
     {
       std::cout << "skipping first loop from two, staying at the same position ..." << curPosition << std::endl;
       currentState = CurrentState::SkipOneLoop;
-      return false;
+      return Status::Continue;
     }
 
     if (currentState == CurrentState::LoopTill2)
@@ -95,143 +106,166 @@ struct Gamer
       if (curPosition + offset == 2)
       {
         currentState = CurrentState::LoopTill2;
+        printMovement(curPosition, offset);
         curPosition+=offset;
         std::cout << "trapped on 2. has to wait till two appears" << std::endl;
       }
       else if (curPosition + offset == 26)
       {
         currentState = CurrentState::SkipOneLoop;
+        printMovement(curPosition, offset);
         curPosition+=offset;
-        std::cout << "trapped to 26. has two skip one loop" << std::endl;
+        std::cout << " have two skip one loop" << std::endl;
       }
       else if (curPosition + offset == 33)
       {
         curPosition+=offset;
-        std::cout << "got to 33. looping again" << std::endl;
-        return true;
+        printMovement(curPosition, offset);
+        std::cout << " looping again" << std::endl;
+        return Status::LoopAgain;
       }
       else if (curPosition + offset == 6)
       {
-        std::cout.width(5); std::cout << std::right << "from " << curPosition << " ";
+        printMovement(curPosition, offset);
         curPosition = 25;
         std::cout << "moving to " << curPosition << std::endl;
       }
       else if (curPosition + offset == 7)
       {
-        std::cout.width(5); std::cout << std::right << "from " << curPosition << " ";
+        printMovement(curPosition, offset);
         curPosition = 2;
         std::cout << "moving to " << curPosition << std::endl;
       }
       else if (curPosition + offset == 13)
       {
-        std::cout.width(5); std::cout << std::right << "from " << curPosition << " ";
+        printMovement(curPosition, offset);
         curPosition = 20;
         std::cout << "moving to " << curPosition << std::endl;
       }
       else if (curPosition + offset == 20)
       {
-        std::cout.width(5); std::cout << std::right << "from " << curPosition << " ";
+        printMovement(curPosition, offset);
         curPosition = 22;
         std::cout << "moving to " << curPosition << std::endl;
       }
       else if (curPosition + offset == 23)
       {
-        std::cout.width(5); std::cout << std::right << "from " << curPosition << " ";
+        printMovement(curPosition, offset);
         curPosition = 0;
         std::cout << "moving to " << curPosition << std::endl;
       }
       else if (curPosition + offset == 25)
       {
-        std::cout.width(5); std::cout << std::right << "from " << curPosition << " ";
+        printMovement(curPosition, offset);
         curPosition = 33;
         std::cout << "moving to " << curPosition << std::endl;
       }
       else if (curPosition + offset == 29)
       {
-        std::cout.width(5); std::cout << std::right << "from " << curPosition << " ";
+        printMovement(curPosition, offset);
         curPosition = 0;
         std::cout << "moving to " << curPosition << std::endl;
       }
       else if (curPosition + offset == 31)
       {
-        std::cout.width(5); std::cout << std::right << "from " << curPosition << " ";
+        printMovement(curPosition, offset);
         curPosition = 21;
         std::cout << "moving to " << curPosition << std::endl;
       }
       else if (curPosition + offset == 38)
       {
-        std::cout.width(5); std::cout << std::right << "from " << curPosition << " ";
+        printMovement(curPosition, offset);
         curPosition = 43;
         std::cout << "moving to " << curPosition << std::endl;
       }
       else if (curPosition + offset == 40)
       {
-        std::cout.width(5); std::cout << std::right << "from " << curPosition << " ";
+        printMovement(curPosition, offset);
         curPosition = 12;
         std::cout << "moving to " << curPosition << std::endl;
       }
       else if (curPosition + offset == 44)
       {
-        std::cout.width(5); std::cout << std::right << "from " << curPosition << " ";
+        printMovement(curPosition, offset);
         curPosition = 34;
         std::cout << "moving to " << curPosition << std::endl;
       }
       else if (curPosition + offset >=46)
       {
-        std::cout.width(5); std::cout << std::right << "from " << curPosition << " ";
+        printMovement(curPosition, offset);
         std::cout << "I won" << std::endl;
-        return 0;
+        return Status::Won;
       }
       else
       {
-        std::cout.width(5); std::cout << std::right << "from " << curPosition << " ";
+        printMovement(curPosition, offset);
         curPosition += offset;
-        std::cout << "simple moving to: " << curPosition << std::endl;
+        std::cout << std::endl;
+        //std::cout << "simple moving to: " << curPosition << std::endl;
       }
     }
-    return false;
+    return Status::Continue;
   }
 };
 
 
-int main()
+int play()
 {
     std::random_device rd;  //Will be used to obtain a seed for the random number engine
     std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
     std::uniform_int_distribution<> dis(1, 6);
 
-    pressKey();
+    //pressKey();
 
     Gamer gamer1;
     Gamer gamer2;
     int gamer = 1;
     while(true)
     {
-      std::cout << "gamer: " << gamer << " ";
+      std::cout << "gamer " << gamer << ": ";
       if (gamer == 1)
       {
-        if (gamer1.runOnce(gen, dis))
+        auto s = gamer1.runOnce(gen, dis);
+        if (s == Status::LoopAgain)
         {
           continue;
         }
-        else
+        else if (s == Status::Continue)
         {
           gamer = 2;
+        }
+        else if (s == Status::Won)
+        {
+          return 0;
         }
       }
       else if (gamer == 2)
       {
-        if (gamer2.runOnce(gen, dis))
+        auto s = gamer2.runOnce(gen, dis);
+        if (s == Status::LoopAgain)
         {
           continue;
         }
-        else
+        else if (s == Status::Continue)
         {
           gamer = 1;
         }
+        else if (s == Status::Won)
+        {
+          return 0;
+        }
       }
-      pressKey();
+      //:w
+      //pressKey();
     }
+}
 
+int main()
+{
+  for (size_t i = 0; i<1000000000; ++i)
+  {
+    //std::cerr << i << std::endl;
+    play();
+  }
   return 0;
 }
