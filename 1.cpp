@@ -16,6 +16,9 @@
 #include <unistd.h>     //STDIN_FILENO
 
 
+#include <future>
+#include <atomic>
+
 void pressKey()
 {
     //the struct termios stores all kinds of flags which can manipulate the I/O Interface
@@ -262,19 +265,44 @@ int play(size_t& player1, size_t& player2)
     }
 }
 
-int main()
+void func(size_t count, std::atomic<size_t>& player1, std::atomic<size_t>& player2)
 {
-  size_t player1 = 0, player2 = 0;
-
-  for (size_t i = 0; i<1000000000; ++i)
+  size_t p1, p2;
+  for (size_t i = 0; i<count; ++i)
   {
     //std::cerr << i << std::endl;
-    play(player1, player2);
+    play(p1, p2);
     if ((i % 1000000) == 0)
     {
       std::cout << i << std::endl;
     }
   }
+  player1+=p1;
+  player2+=p2;
+}
+
+int main()
+{
+  std::atomic<size_t> player1{}, player2{};
+  size_t count = 1000000000;
+  auto f = [&](){
+             func(count / 4, player1, player2); 
+           };
+  auto f1 = std::async(std::launch::async, f);
+  auto f2 = std::async(std::launch::async, f);
+  auto f3 = std::async(std::launch::async, f);
+  auto f4 = std::async(std::launch::async, f);
+
+  f1.wait();
+  f2.wait();
+  f3.wait();
+  f4.wait();
+
+  if (player1 + player2 != count)
+  {
+    std::cout << "error " << std::endl;
+  }
+
   std::cout << "player1: " << player1 << std::endl;
   std::cout << "player2: " << player2 << std::endl;
 
