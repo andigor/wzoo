@@ -19,6 +19,8 @@
 #include <future>
 #include <atomic>
 
+#include <sstream>
+
 void pressKey()
 {
     //the struct termios stores all kinds of flags which can manipulate the I/O Interface
@@ -267,36 +269,51 @@ int play(size_t& player1, size_t& player2)
 
 void func(size_t count, std::atomic<size_t>& player1, std::atomic<size_t>& player2)
 {
-  size_t p1, p2;
-  for (size_t i = 0; i<count; ++i)
+  size_t p1{}, p2{};
+  size_t i = 0;
+  for (; i<count; ++i)
   {
     //std::cerr << i << std::endl;
     play(p1, p2);
-    if ((i % 1000000) == 0)
-    {
-      std::cout << i << std::endl;
-    }
   }
-  player1+=p1;
-  player2+=p2;
+
+  player1.fetch_add(p1);
+  player2.fetch_add(p2);
+
+  std::string s;
+  std::stringstream ss(s);
+  ss << "full iterations: " << p1 + p2 << " and i: " <<  i << " player2: " << player1 << " player2: " << player2 << std::endl;
+  std::cout << ss.str(); 
 }
 
 int main()
 {
   std::atomic<size_t> player1{}, player2{};
-  size_t count = 1000000000;
+
+  player1.store(0);
+  player2.store(0);
+
+  size_t count = 100000000;
   auto f = [&](){
-             func(count / 4, player1, player2); 
+             func(count / 8, player1, player2); 
            };
   auto f1 = std::async(std::launch::async, f);
   auto f2 = std::async(std::launch::async, f);
   auto f3 = std::async(std::launch::async, f);
   auto f4 = std::async(std::launch::async, f);
+  auto f5 = std::async(std::launch::async, f);
+  auto f6 = std::async(std::launch::async, f);
+  auto f7 = std::async(std::launch::async, f);
+  auto f8 = std::async(std::launch::async, f);
 
   f1.wait();
   f2.wait();
   f3.wait();
   f4.wait();
+  f5.wait();
+  f6.wait();
+  f7.wait();
+  f8.wait();
 
   if (player1 + player2 != count)
   {
