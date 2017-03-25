@@ -197,46 +197,36 @@ inline int play(size_t& player1, size_t& player2, std::mt19937& gen, std::unifor
 
     Gamer gamer1;
     Gamer gamer2;
-    int gamer = 1;
+
     while(true)
     {
       //std::cout << "gamer " << gamer << ": ";
-      if (gamer == 1)
       {
         auto s = gamer1.runOnce(gen, dis, states);
         if (s == Status::LoopAgain)
         {
-          continue;
+          s = gamer1.runOnce(gen, dis, states);
         }
-        else if (s == Status::Continue)
-        {
-          gamer = 2;
-        }
-        else if (s == Status::Won)
+        
+        if (s == Status::Won)
         {
           ++player1;
           return 0;
         }
       }
-      else if (gamer == 2)
       {
         auto s = gamer2.runOnce(gen, dis, states);
         if (s == Status::LoopAgain)
         {
-          continue;
+          s = gamer2.runOnce(gen, dis, states);
         }
-        else if (s == Status::Continue)
-        {
-          gamer = 1;
-        }
-        else if (s == Status::Won)
+        
+        if (s == Status::Won)
         {
           ++player2;
           return 0;
         }
       }
-      //:w
-      //pressKey();
     }
 }
 
