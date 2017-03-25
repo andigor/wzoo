@@ -105,108 +105,126 @@ struct Gamer
         currentState = CurrentState::NoState;
       }
     }
-
+    auto new_pos = curPosition + offset;
     if (currentState == CurrentState::NoState)
     {
-      if (curPosition + offset == 2)
+      switch (new_pos)
+      {
+      case 2:
       {
         currentState = CurrentState::LoopTill2;
         printMovement(curPosition, offset);
         curPosition+=offset;
         //std::cout << "trapped on 2. has to wait till two appears" << std::endl;
+      break;
       }
-      else if (curPosition + offset == 26)
+      case 26:
       {
         currentState = CurrentState::SkipOneLoop;
         printMovement(curPosition, offset);
         curPosition+=offset;
         //std::cout << " have two skip one loop" << std::endl;
+      break;
       }
-      else if (curPosition + offset == 33)
+      case 33:
       {
         curPosition+=offset;
         printMovement(curPosition, offset);
         //std::cout << " looping again" << std::endl;
         return Status::LoopAgain;
+      break;
       }
-      else if (curPosition + offset == 6)
+      case 6:
       {
         printMovement(curPosition, offset);
         curPosition = 25;
         //std::cout << "moving to " << curPosition << std::endl;
+      break;
       }
-      else if (curPosition + offset == 7)
+      case 7:
       {
         printMovement(curPosition, offset);
         curPosition = 2;
         //std::cout << "moving to " << curPosition << std::endl;
+      break;
       }
-      else if (curPosition + offset == 13)
+      case 13:
       {
         printMovement(curPosition, offset);
         curPosition = 20;
         //std::cout << "moving to " << curPosition << std::endl;
+      break;
       }
-      else if (curPosition + offset == 20)
+      case 20:
       {
         printMovement(curPosition, offset);
         curPosition = 22;
         //std::cout << "moving to " << curPosition << std::endl;
+      break;
       }
-      else if (curPosition + offset == 23)
+      case 23:
       {
         printMovement(curPosition, offset);
         curPosition = 0;
         //std::cout << "moving to " << curPosition << std::endl;
+      break;
       }
-      else if (curPosition + offset == 25)
+      case 25:
       {
         printMovement(curPosition, offset);
         curPosition = 33;
         //std::cout << "moving to " << curPosition << std::endl;
+      break;
       }
-      else if (curPosition + offset == 29)
+      case 29:
       {
         printMovement(curPosition, offset);
         curPosition = 0;
         //std::cout << "moving to " << curPosition << std::endl;
+      break;
       }
-      else if (curPosition + offset == 31)
+      case 31:
       {
         printMovement(curPosition, offset);
         curPosition = 21;
         //std::cout << "moving to " << curPosition << std::endl;
+      break;
       }
-      else if (curPosition + offset == 38)
+      case 38:
       {
         printMovement(curPosition, offset);
         curPosition = 43;
         //std::cout << "moving to " << curPosition << std::endl;
+      break;
       }
-      else if (curPosition + offset == 40)
+      case 40:
       {
         printMovement(curPosition, offset);
         curPosition = 12;
         //std::cout << "moving to " << curPosition << std::endl;
+      break;
       }
-      else if (curPosition + offset == 44)
+      case 44:
       {
         printMovement(curPosition, offset);
         curPosition = 34;
         //std::cout << "moving to " << curPosition << std::endl;
       }
-      else if (curPosition + offset >=46)
-      {
-        printMovement(curPosition, offset);
-        //std::cout << "I won" << std::endl;
-        return Status::Won;
-      }
-      else
-      {
-        printMovement(curPosition, offset);
-        curPosition += offset;
-        //std::cout << std::endl;
-        ////std::cout << "simple moving to: " << curPosition << std::endl;
+      default:
+        if (new_pos >=46)
+        {
+          printMovement(curPosition, offset);
+          //std::cout << "I won" << std::endl;
+          return Status::Won;
+        }
+        else
+        {
+          printMovement(curPosition, offset);
+          curPosition += offset;
+          //std::cout << std::endl;
+          ////std::cout << "simple moving to: " << curPosition << std::endl;
+        }
+      break;
       }
     }
     return Status::Continue;
@@ -214,11 +232,8 @@ struct Gamer
 };
 
 
-int play(size_t& player1, size_t& player2)
+int play(size_t& player1, size_t& player2, std::mt19937& gen, std::uniform_int_distribution<>& dis)
 {
-    std::random_device rd;  //Will be used to obtain a seed for the random number engine
-    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
-    std::uniform_int_distribution<> dis(1, 6);
 
     //pressKey();
 
@@ -269,12 +284,15 @@ int play(size_t& player1, size_t& player2)
 
 void func(size_t count, std::atomic<size_t>& player1, std::atomic<size_t>& player2)
 {
+  std::random_device rd;  //Will be used to obtain a seed for the random number engine
+  std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+  std::uniform_int_distribution<> dis(1, 6);
   size_t p1{}, p2{};
   size_t i = 0;
   for (; i<count; ++i)
   {
     //std::cerr << i << std::endl;
-    play(p1, p2);
+    play(p1, p2, gen, dis);
   }
 
   player1.fetch_add(p1);
@@ -293,27 +311,27 @@ int main()
   player1.store(0);
   player2.store(0);
 
-  size_t count = 100000000;
+  size_t count = 10000000;
   auto f = [&](){
-             func(count / 8, player1, player2); 
+             func(count , player1, player2); 
            };
   auto f1 = std::async(std::launch::async, f);
-  auto f2 = std::async(std::launch::async, f);
-  auto f3 = std::async(std::launch::async, f);
-  auto f4 = std::async(std::launch::async, f);
-  auto f5 = std::async(std::launch::async, f);
-  auto f6 = std::async(std::launch::async, f);
-  auto f7 = std::async(std::launch::async, f);
-  auto f8 = std::async(std::launch::async, f);
+  //auto f2 = std::async(std::launch::async, f);
+  //auto f3 = std::async(std::launch::async, f);
+  //auto f4 = std::async(std::launch::async, f);
+  //auto f5 = std::async(std::launch::async, f);
+  //auto f6 = std::async(std::launch::async, f);
+  //auto f7 = std::async(std::launch::async, f);
+  //auto f8 = std::async(std::launch::async, f);
 
   f1.wait();
-  f2.wait();
-  f3.wait();
-  f4.wait();
-  f5.wait();
-  f6.wait();
-  f7.wait();
-  f8.wait();
+  //f2.wait();
+  //f3.wait();
+  //f4.wait();
+  //f5.wait();
+  //f6.wait();
+  //f7.wait();
+  //f8.wait();
 
   if (player1 + player2 != count)
   {
