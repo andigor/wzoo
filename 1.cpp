@@ -151,6 +151,15 @@ struct Gamer
   {
     auto offset = dis(gen);
     //std::cout << "throwing result: " << offset << "| ";
+
+    if (currentState == CurrentState::NoState)
+    {
+      auto new_pos = curPosition + offset;
+      const auto& s = states[new_pos];
+      currentState = s.currentState;
+      curPosition = s.pos;
+      return s.status;
+    }
      
     if (currentState == CurrentState::SkipOneLoop)
     {
@@ -176,15 +185,7 @@ struct Gamer
         currentState = CurrentState::NoState;
       }
     }
-    auto new_pos = curPosition + offset;
 
-    if (currentState == CurrentState::NoState)
-    {
-      const auto& s = states[new_pos];
-      currentState = s.currentState;
-      curPosition = s.pos;
-      return s.status;
-    }
   }
 };
 
