@@ -20,6 +20,12 @@
 #include <atomic>
 
 #include <sstream>
+#include <vector>
+
+template <typename E>
+constexpr typename std::underlying_type<E>::type to_underlying(E e) {
+  return static_cast<typename std::underlying_type<E>::type>(e);
+}
 
 void pressKey()
 {
@@ -68,6 +74,71 @@ enum class Status
   Won
 };
 
+
+struct NewState
+{
+  CurrentState currentState;
+  Status       status;
+  size_t       pos;
+};
+
+
+void fillNoState_States(std::vector<NewState>& states )
+{
+  size_t new_pos = 0;
+  new_pos= 1; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos= 2; states.push_back(NewState{CurrentState::LoopTill2,   Status::Continue, new_pos});
+  new_pos= 3; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos= 4; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos= 5; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos= 6; states.push_back(NewState{CurrentState::NoState,     Status::Continue,      25});
+  new_pos= 7; states.push_back(NewState{CurrentState::NoState,     Status::Continue,       2});
+  new_pos= 8; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos= 9; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=10; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=11; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=12; states.push_back(NewState{CurrentState::SkipTwoLoops,Status::Continue, new_pos});
+  new_pos=13; states.push_back(NewState{CurrentState::NoState,     Status::Continue,      20});
+  new_pos=14; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=15; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=16; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=17; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=18; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=19; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=10; states.push_back(NewState{CurrentState::NoState,     Status::Continue,      22});
+  new_pos=21; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=22; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=23; states.push_back(NewState{CurrentState::NoState,     Status::Continue,       0});
+  new_pos=24; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=25; states.push_back(NewState{CurrentState::NoState,     Status::Continue,      33});
+  new_pos=26; states.push_back(NewState{CurrentState::SkipOneLoop, Status::Continue, new_pos});
+  new_pos=27; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=28; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=29; states.push_back(NewState{CurrentState::NoState,     Status::Continue,       0});
+  new_pos=30; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=31; states.push_back(NewState{CurrentState::NoState,     Status::Continue,      21});
+  new_pos=32; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=33; states.push_back(NewState{CurrentState::NoState,     Status::LoopAgain,new_pos});
+  new_pos=34; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=35; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=36; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=37; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=38; states.push_back(NewState{CurrentState::NoState,     Status::Continue,      43});
+  new_pos=39; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=40; states.push_back(NewState{CurrentState::NoState,     Status::Continue,      12});
+  new_pos=41; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=42; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=43; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=44; states.push_back(NewState{CurrentState::NoState,     Status::Continue,      34});
+  new_pos=45; states.push_back(NewState{CurrentState::NoState,     Status::Continue, new_pos});
+  new_pos=46; states.push_back(NewState{CurrentState::NoState,     Status::Won,           46});
+  new_pos=47; states.push_back(NewState{CurrentState::NoState,     Status::Won,           46});
+  new_pos=48; states.push_back(NewState{CurrentState::NoState,     Status::Won,           46});
+  new_pos=49; states.push_back(NewState{CurrentState::NoState,     Status::Won,           46});
+  new_pos=50; states.push_back(NewState{CurrentState::NoState,     Status::Won,           46});
+  new_pos=51; states.push_back(NewState{CurrentState::NoState,     Status::Won,           46});
+}
+
 struct Gamer
 {
   CurrentState currentState = CurrentState::NoState;
@@ -76,7 +147,7 @@ struct Gamer
   {
     //std::cout << from << "->" << from + offset << " ";
   }
-  Status runOnce(std::mt19937& gen, std::uniform_int_distribution<>& dis)
+  Status runOnce(std::mt19937& gen, std::uniform_int_distribution<>& dis, const std::vector<NewState>& states)
   {
     auto offset = dis(gen);
     //std::cout << "throwing result: " << offset << "| ";
@@ -106,133 +177,19 @@ struct Gamer
       }
     }
     auto new_pos = curPosition + offset;
+
     if (currentState == CurrentState::NoState)
     {
-      switch (new_pos)
-      {
-      case 2:
-      {
-        currentState = CurrentState::LoopTill2;
-        printMovement(curPosition, offset);
-        curPosition+=offset;
-        //std::cout << "trapped on 2. has to wait till two appears" << std::endl;
-      break;
-      }
-      case 26:
-      {
-        currentState = CurrentState::SkipOneLoop;
-        printMovement(curPosition, offset);
-        curPosition+=offset;
-        //std::cout << " have two skip one loop" << std::endl;
-      break;
-      }
-      case 33:
-      {
-        curPosition+=offset;
-        printMovement(curPosition, offset);
-        //std::cout << " looping again" << std::endl;
-        return Status::LoopAgain;
-      break;
-      }
-      case 6:
-      {
-        printMovement(curPosition, offset);
-        curPosition = 25;
-        //std::cout << "moving to " << curPosition << std::endl;
-      break;
-      }
-      case 7:
-      {
-        printMovement(curPosition, offset);
-        curPosition = 2;
-        //std::cout << "moving to " << curPosition << std::endl;
-      break;
-      }
-      case 13:
-      {
-        printMovement(curPosition, offset);
-        curPosition = 20;
-        //std::cout << "moving to " << curPosition << std::endl;
-      break;
-      }
-      case 20:
-      {
-        printMovement(curPosition, offset);
-        curPosition = 22;
-        //std::cout << "moving to " << curPosition << std::endl;
-      break;
-      }
-      case 23:
-      {
-        printMovement(curPosition, offset);
-        curPosition = 0;
-        //std::cout << "moving to " << curPosition << std::endl;
-      break;
-      }
-      case 25:
-      {
-        printMovement(curPosition, offset);
-        curPosition = 33;
-        //std::cout << "moving to " << curPosition << std::endl;
-      break;
-      }
-      case 29:
-      {
-        printMovement(curPosition, offset);
-        curPosition = 0;
-        //std::cout << "moving to " << curPosition << std::endl;
-      break;
-      }
-      case 31:
-      {
-        printMovement(curPosition, offset);
-        curPosition = 21;
-        //std::cout << "moving to " << curPosition << std::endl;
-      break;
-      }
-      case 38:
-      {
-        printMovement(curPosition, offset);
-        curPosition = 43;
-        //std::cout << "moving to " << curPosition << std::endl;
-      break;
-      }
-      case 40:
-      {
-        printMovement(curPosition, offset);
-        curPosition = 12;
-        //std::cout << "moving to " << curPosition << std::endl;
-      break;
-      }
-      case 44:
-      {
-        printMovement(curPosition, offset);
-        curPosition = 34;
-        //std::cout << "moving to " << curPosition << std::endl;
-      }
-      default:
-        if (new_pos >=46)
-        {
-          printMovement(curPosition, offset);
-          //std::cout << "I won" << std::endl;
-          return Status::Won;
-        }
-        else
-        {
-          printMovement(curPosition, offset);
-          curPosition += offset;
-          //std::cout << std::endl;
-          ////std::cout << "simple moving to: " << curPosition << std::endl;
-        }
-      break;
-      }
+      const auto& s = states[new_pos];
+      currentState = s.currentState;
+      curPosition = s.pos;
+      return s.status;
     }
-    return Status::Continue;
   }
 };
 
 
-int play(size_t& player1, size_t& player2, std::mt19937& gen, std::uniform_int_distribution<>& dis)
+inline int play(size_t& player1, size_t& player2, std::mt19937& gen, std::uniform_int_distribution<>& dis, const std::vector<NewState>& states)
 {
 
     //pressKey();
@@ -245,7 +202,7 @@ int play(size_t& player1, size_t& player2, std::mt19937& gen, std::uniform_int_d
       //std::cout << "gamer " << gamer << ": ";
       if (gamer == 1)
       {
-        auto s = gamer1.runOnce(gen, dis);
+        auto s = gamer1.runOnce(gen, dis, states);
         if (s == Status::LoopAgain)
         {
           continue;
@@ -262,7 +219,7 @@ int play(size_t& player1, size_t& player2, std::mt19937& gen, std::uniform_int_d
       }
       else if (gamer == 2)
       {
-        auto s = gamer2.runOnce(gen, dis);
+        auto s = gamer2.runOnce(gen, dis, states);
         if (s == Status::LoopAgain)
         {
           continue;
@@ -282,7 +239,7 @@ int play(size_t& player1, size_t& player2, std::mt19937& gen, std::uniform_int_d
     }
 }
 
-void func(size_t count, std::atomic<size_t>& player1, std::atomic<size_t>& player2)
+inline void func(size_t count, std::atomic<size_t>& player1, std::atomic<size_t>& player2, const std::vector<NewState>& states)
 {
   std::random_device rd;  //Will be used to obtain a seed for the random number engine
   std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
@@ -292,7 +249,7 @@ void func(size_t count, std::atomic<size_t>& player1, std::atomic<size_t>& playe
   for (; i<count; ++i)
   {
     //std::cerr << i << std::endl;
-    play(p1, p2, gen, dis);
+    play(p1, p2, gen, dis, states);
   }
 
   player1.fetch_add(p1);
@@ -310,10 +267,12 @@ int main()
 
   player1.store(0);
   player2.store(0);
+  std::vector<NewState> NoState_States;
+  fillNoState_States(NoState_States);
 
   size_t count = 10000000;
   auto f = [&](){
-             func(count , player1, player2); 
+             func(count , player1, player2, NoState_States); 
            };
   auto f1 = std::async(std::launch::async, f);
   //auto f2 = std::async(std::launch::async, f);
